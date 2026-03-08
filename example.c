@@ -40,36 +40,36 @@
  * @param cube 魔方结构体指针
  * @return 无
  */
-void print_cube_as_num(const uint8_t* cube) {
+void print_cube_as_num(const cube_t* cube) {
   printf("print rubik's cube as num:\n\n");
 
   // U
   printf("                +-----------+\n");
-  printf("                | %d | %d | %d |\n", cube[4*8+0], cube[4*8+1], cube[4*8+2]);
+  printf("                | %d | %d | %d |\n", cube[1*8+6], cube[1*8+7], cube[1*8+0]);
   printf("                +-----------+\n");
-  printf("                | %d | %d | %d |\n", cube[4*8+7],      4     , cube[4*8+3]);
+  printf("                | %d | %d | %d |\n", cube[1*8+5],      1     , cube[1*8+1]);
   printf("                +-----------+\n");
-  printf("                | %d | %d | %d |\n", cube[4*8+6], cube[4*8+5], cube[4*8+4]);
+  printf("                | %d | %d | %d |\n", cube[1*8+4], cube[1*8+3], cube[1*8+2]);
   printf("                +-----------+\n");
   printf("\n");
 
   // F L R B
   printf("+-----------+   +-----------+   +-----------+   +-----------+\n");
-  printf("| %d | %d | %d |   | %d | %d | %d |   | %d | %d | %d |   | %d | %d | %d |\n", cube[3*8+0], cube[3*8+1], cube[3*8+2], cube[0*8+0], cube[0*8+1], cube[0*8+2], cube[1*8+0], cube[1*8+1], cube[1*8+2], cube[2*8+0], cube[2*8+1], cube[2*8+2]);
+  printf("| %d | %d | %d |   | %d | %d | %d |   | %d | %d | %d |   | %d | %d | %d |\n", cube[5*8+6], cube[5*8+7], cube[5*8+0], cube[0*8+0], cube[0*8+1], cube[0*8+2], cube[2*8+6], cube[2*8+7], cube[2*8+0], cube[3*8+4], cube[3*8+5], cube[3*8+6]);
   printf("+-----------+   +-----------+   +-----------+   +-----------+\n");
-  printf("| %d | %d | %d |   | %d | %d | %d |   | %d | %d | %d |   | %d | %d | %d |\n", cube[3*8+7],      3     , cube[3*8+3], cube[0*8+7],      0     , cube[0*8+3], cube[1*8+7],      1     , cube[1*8+3], cube[2*8+7],      2     , cube[2*8+3]);
+  printf("| %d | %d | %d |   | %d | %d | %d |   | %d | %d | %d |   | %d | %d | %d |\n", cube[5*8+5],      5     , cube[5*8+1], cube[0*8+7],      0     , cube[0*8+3], cube[2*8+5],      2     , cube[2*8+1], cube[3*8+3],      3     , cube[3*8+7]);
   printf("+-----------+   +-----------+   +-----------+   +-----------+\n");
-  printf("| %d | %d | %d |   | %d | %d | %d |   | %d | %d | %d |   | %d | %d | %d |\n", cube[3*8+6], cube[3*8+5], cube[3*8+4], cube[0*8+6], cube[0*8+5], cube[0*8+4], cube[1*8+6], cube[1*8+5], cube[1*8+4], cube[2*8+6], cube[2*8+5], cube[2*8+4]);
+  printf("| %d | %d | %d |   | %d | %d | %d |   | %d | %d | %d |   | %d | %d | %d |\n", cube[5*8+4], cube[5*8+3], cube[5*8+2], cube[0*8+6], cube[0*8+5], cube[0*8+4], cube[2*8+4], cube[2*8+3], cube[2*8+2], cube[3*8+2], cube[3*8+1], cube[3*8+0]);
   printf("+-----------+   +-----------+   +-----------+   +-----------+\n");
   printf("\n");
 
   // D
   printf("                +-----------+\n");
-  printf("                | %d | %d | %d |\n", cube[5*8+0], cube[5*8+1], cube[5*8+2]);
+  printf("                | %d | %d | %d |\n", cube[4*8+2], cube[4*8+3], cube[4*8+4]);
   printf("                +-----------+\n");
-  printf("                | %d | %d | %d |\n", cube[5*8+7],      5     , cube[5*8+3]);
+  printf("                | %d | %d | %d |\n", cube[4*8+1],      4     , cube[4*8+5]);
   printf("                +-----------+\n");
-  printf("                | %d | %d | %d |\n", cube[5*8+6], cube[5*8+5], cube[5*8+4]);
+  printf("                | %d | %d | %d |\n", cube[4*8+0], cube[4*8+7], cube[4*8+6]);
   printf("                +-----------+\n");
 }
 
@@ -78,7 +78,7 @@ void print_cube_as_num(const uint8_t* cube) {
  * @param cube 魔方结构体指针
  * @return 无
  */
-void print_cube_with_color(const uint8_t* cube) {
+void print_cube_with_color(const cube_t* cube) {
   printf("print rubik's cube with color:\n\n");
 
   // U
@@ -103,7 +103,8 @@ void print_cube_with_color(const uint8_t* cube) {
 int main(void) {
   cube_reset_color(); // 初始化魔方颜色信息
   const cube_t* cube = cube_get_color();
-  print_cube_with_color(cube);
-  //print_cube_as_num(cube);
+  cube_update_color("R2");
+  //print_cube_with_color(cube);
+  print_cube_as_num(cube);
   return 0;
 }

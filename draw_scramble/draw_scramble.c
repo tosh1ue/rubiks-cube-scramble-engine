@@ -8,96 +8,41 @@
 #include "draw_scramble.h"
 #include <string.h>
 
-#define CUBE_ORDER 3 // 魔方阶数
-#define CUBE_FACE_NUM 6 // 魔方面数
-#define CUBE_FACE_STICKER_NUM (CUBE_ORDER * CUBE_ORDER - 1) // 魔方每面色块数，省略中心块
-#define CUBE_TURN_CYCLE 4 // 魔方转动周期
-#define CUBE_STICKER_NUM (CUBE_FACE_NUM * CUBE_STICKER_NUM) // 魔方总色块数
-
 /**
- * @brief 魔方面索引值，白顶绿前，正视面对应绿色面，以此类推
+ * @brief 魔方正视面映射关系，以魔方正视面顺序排列，通过当前正视面获取四个相邻面的索引及顺序
+ * 结构：CUBE_FACING_MAP[cube_face_t idx] = {CUBE_FACING_UP, CUBE_FACING_RIGHT, CUBE_FACING_DOWN, CUBE_FACING_LEFT};
  */
-#define CUBE_FACE_F_IDX CUBE_COLOR_GREEN
-#define CUBE_FACE_R_IDX CUBE_COLOR_RED
-#define CUBE_FACE_B_IDX CUBE_COLOR_BLUE
-#define CUBE_FACE_L_IDX CUBE_COLOR_ORANGE
-#define CUBE_FACE_U_IDX CUBE_COLOR_WHITE
-#define CUBE_FACE_D_IDX CUBE_COLOR_YELLOW
+static const cube_face_t CUBE_FACING_MAP[CUBE_FACE_NUM][CUBE_TURN_CYCLE] = {
+  {CUBE_FACE_U_IDX, CUBE_FACE_R_IDX, CUBE_FACE_D_IDX, CUBE_FACE_L_IDX}, // CUBE_FACING_FRONT
+  {CUBE_FACE_R_IDX, CUBE_FACE_F_IDX, CUBE_FACE_L_IDX, CUBE_FACE_B_IDX}, // CUBE_FACING_UP
+  {CUBE_FACE_B_IDX, CUBE_FACE_D_IDX, CUBE_FACE_F_IDX, CUBE_FACE_U_IDX}, // CUBE_FACING_RIGHT
+  {CUBE_FACE_D_IDX, CUBE_FACE_R_IDX, CUBE_FACE_U_IDX, CUBE_FACE_L_IDX}, // CUBE_FACING_BACK
+  {CUBE_FACE_L_IDX, CUBE_FACE_F_IDX, CUBE_FACE_R_IDX, CUBE_FACE_B_IDX}, // CUBE_FACING_DOWN
+  {CUBE_FACE_F_IDX, CUBE_FACE_D_IDX, CUBE_FACE_B_IDX, CUBE_FACE_U_IDX}  // CUBE_FACING_LEFT
 
-/**
- * @brief 魔方正视面
- */
-#define CUBE_FACING_FRONT CUBE_FACE_F_IDX
-#define CUBE_FACING_RIGHT CUBE_FACE_R_IDX
-#define CUBE_FACING_BACK CUBE_FACE_B_IDX
-#define CUBE_FACING_LEFT CUBE_FACE_L_IDX
-#define CUBE_FACING_UP CUBE_FACE_U_IDX
-#define CUBE_FACING_DOWN CUBE_FACE_D_IDX
 
-/**
- * @brief 魔方正视面映射关系，以枚举魔方正视面顺序排列，通过当前正视面获取四个相邻面的索引及顺序
- * 结构：CUBE_FACING_MAP[Cube_Facing idx] = {CUBE_FACING_LEFT, CUBE_FACING_UP, CUBE_FACING_RIGHT, CUBE_FACING_DOWN};
- */
-static const uint8_t CUBE_FACING_MAP[CUBE_FACE_NUM][CUBE_TURN_CYCLE] = {
-  {CUBE_FACE_L_IDX, CUBE_FACE_U_IDX, CUBE_FACE_R_IDX, CUBE_FACE_D_IDX}, // CUBE_FACING_FRONT
-  {CUBE_FACE_F_IDX, CUBE_FACE_U_IDX, CUBE_FACE_B_IDX, CUBE_FACE_D_IDX}, // CUBE_FACING_RIGHT
-  {CUBE_FACE_R_IDX, CUBE_FACE_U_IDX, CUBE_FACE_L_IDX, CUBE_FACE_D_IDX}, // CUBE_FACING_BACK
-  {CUBE_FACE_B_IDX, CUBE_FACE_U_IDX, CUBE_FACE_F_IDX, CUBE_FACE_D_IDX}, // CUBE_FACING_LEFT
-  {CUBE_FACE_B_IDX, CUBE_FACE_R_IDX, CUBE_FACE_F_IDX, CUBE_FACE_L_IDX}, // CUBE_FACING_UP
-  {CUBE_FACE_B_IDX, CUBE_FACE_L_IDX, CUBE_FACE_F_IDX, CUBE_FACE_R_IDX}  // CUBE_FACING_DOWN
 };
 
-
-
 /**
- * @brief 魔方颜色结构，由于中心块不变，无需存储
- * @details 用face_idx * gap + sticker_idx 取值
- *          +-----------+
- *          | 0 | 1 | 2 |
- *          +-----------+
- *          | 7 |   | 3 |
- *          +-----------+
- *          | 6 | 5 | 4 |
- *          +-----------+
+ * @brief 魔方颜色信息数组
  */
-#define CUBE_STICKER_FLU_IDX 0
-#define CUBE_STICKER_FU_IDX 1
-#define CUBE_STICKER_FRU_IDX 2
-#define CUBE_STICKER_FR_IDX 3
-#define CUBE_STICKER_FRD_IDX 4
-#define CUBE_STICKER_FD_IDX 5
-#define CUBE_STICKER_FLD_IDX 6
-#define CUBE_STICKER_FL_IDX 7
-
-static uint8_t cube[CUBE_STICKER_NUM];
+static cube_t cube[CUBE_STICKER_NUM];
 
 /**
  * @brief 以当前正视面获取交换色块的下标索引
  * @param facing_idx 魔方当前正视面的下标
- * @param *idxs 交换色块的下标索引指针
+ * @param idx 交换色块的下标索引指针
  */
-void get_sticker_idxs(cube_facing_t facing_idx, uint8_t *idxs) {
-  switch (facing_idx) {
-    case CUBE_FACING_FRONT:
-    case CUBE_FACING_RIGHT:
-    case CUBE_FACING_BACK:
-    case CUBE_FACING_LEFT:
-      idxs[0] = CUBE_STICKER_FRU_IDX;
-      idxs[1] = CUBE_STICKER_FR_IDX;
-      idxs[2] = CUBE_STICKER_FRD_IDX;
-      break;
-    case CUBE_FACING_UP:
-      idxs[0] = CUBE_STICKER_FLU_IDX;
-      idxs[1] = CUBE_STICKER_FU_IDX;
-      idxs[2] = CUBE_STICKER_FRU_IDX;
-      break;
-    case CUBE_FACING_DOWN:
-      idxs[0] = CUBE_STICKER_FLD_IDX;
-      idxs[1] = CUBE_STICKER_FD_IDX;
-      idxs[2] = CUBE_STICKER_FRD_IDX;
-      break;
-    default:
-      break;
+void get_sticker_idx(const cube_face_t facing_idx, cube_color_t* idx) {
+  const uint8_t is_even = facing_idx % 2 == 0;
+  if (is_even) {
+    idx[0] = CUBE_STICKER_FRU_IDX;
+    idx[1] = CUBE_STICKER_FR_IDX;
+    idx[2] = CUBE_STICKER_FRD_IDX;
+  } else {
+    idx[0] = CUBE_STICKER_FLD_IDX;
+    idx[1] = CUBE_STICKER_FL_IDX;
+    idx[2] = CUBE_STICKER_FLU_IDX;
   }
 }
 
@@ -112,70 +57,120 @@ void cube_reset_color(void) {
   }
 }
 
-/*
-说明：根据单步打乱，更新魔方颜色
-Cube_Turn turn_degree; 
-(CUBE_TURN_CYCLE - turn_degree) * 2即为需要交换的色块索引偏移，
-转动90度，turn = 1，索引偏移量为6
-转动180度，turn = 2，索引偏移量为4
-转动270度，turn = 3，索引偏移量为2
-CUBE_TURN_CYCLE - turn_degree即为需要交换的面索引偏移，
-转动90度，turn = 1，索引偏移量为3
-转动180度，turn = 2，索引偏移量为2
-转动270度，turn = 3，索引偏移量为1
-@param cube_t *cube 魔方颜色结构体指针
-@param Cube_Facing facing_idx 魔方当前正视面的下标
-@param Cube_Turn turn 魔方转动角度
-@return 无
-*/
-void cube_color_update(cube_facing_t facing_idx, cube_turn_t turn_degree) {
-  uint8_t tempColorIdx; // 临时颜色索引，用于处理循环交换
-  uint8_t faceIdxOffset; // 魔方面索引偏移
-  uint8_t stickerIdxOffset; // 魔方色块索引偏移
-  uint8_t stickerIdxs[3]; // 需要交换的色块下标索引
-  // 相邻面面颜色更新，从正视面的L面开始
-  get_sticker_idxs(facing_idx, stickerIdxs);
-  faceIdxOffset = CUBE_TURN_CYCLE - turn_degree;
+/**
+ * @brief 根据正视面和旋转角度，执行单步打乱颜色更新
+ * @details 以U为基准，4个相邻面的偏移分别是0 y' 0 y
+ * @param facing_idx 魔方正视面索引
+ * @param turn_degree 旋转角度
+ * @return 无
+ */
+void cube_turn(const cube_face_t facing_idx, const cube_turn_t turn_degree) {
+  cube_color_t tempColorIdx; // 临时颜色索引，用于处理循环交换
+  const uint8_t stickerIdxOffset = (CUBE_TURN_CYCLE - turn_degree) * 2; // 魔方面内色块索引偏移
+  const cube_face_t *faceIdx = CUBE_FACING_MAP[facing_idx];; // 需要交换的面下标索引
+  cube_color_t stickerIdx[3]; // 需要交换的色块下标索引
+  get_sticker_idx(facing_idx, stickerIdx);
   switch (turn_degree) {
-    
+    case CUBE_TURN_90: {
+      // 相邻面颜色更新
+      for (cube_color_t i = 0; i < sizeof(stickerIdx); ++i) {
+        tempColorIdx = cube[faceIdx[CUBE_SIDE_U] * CUBE_FACE_STICKER_NUM + stickerIdx[i]];
+        cube[faceIdx[CUBE_SIDE_U] * CUBE_FACE_STICKER_NUM + stickerIdx[i]] = cube[faceIdx[CUBE_SIDE_L] * CUBE_FACE_STICKER_NUM + OFFSET_L(stickerIdx[i])];
+        cube[faceIdx[CUBE_SIDE_L] * CUBE_FACE_STICKER_NUM + OFFSET_L(stickerIdx[i])] = cube[faceIdx[CUBE_SIDE_D] * CUBE_FACE_STICKER_NUM + stickerIdx[i]];
+        cube[faceIdx[CUBE_SIDE_D] * CUBE_FACE_STICKER_NUM + stickerIdx[i]] = cube[faceIdx[CUBE_SIDE_R] * CUBE_FACE_STICKER_NUM + OFFSET_R(stickerIdx[i])];
+        cube[faceIdx[CUBE_SIDE_R] * CUBE_FACE_STICKER_NUM + OFFSET_R(stickerIdx[i])] = tempColorIdx;
+      }
+      break;
+    }
+    case CUBE_TURN_180: { // 180度是两两互换，需要特殊处理
+      // 相邻面颜色更新
+      for (cube_color_t i = 0; i < sizeof(stickerIdx); ++i) {
+        tempColorIdx = cube[faceIdx[CUBE_SIDE_U] * CUBE_FACE_STICKER_NUM + stickerIdx[i]];
+        cube[faceIdx[CUBE_SIDE_U] * CUBE_FACE_STICKER_NUM + stickerIdx[i]] = cube[faceIdx[CUBE_SIDE_D] * CUBE_FACE_STICKER_NUM + stickerIdx[i]];
+        cube[faceIdx[CUBE_SIDE_D] * CUBE_FACE_STICKER_NUM + stickerIdx[i]] = tempColorIdx;
+        tempColorIdx = cube[faceIdx[CUBE_SIDE_L] * CUBE_FACE_STICKER_NUM + OFFSET_L(stickerIdx[i])];
+        cube[faceIdx[CUBE_SIDE_L] * CUBE_FACE_STICKER_NUM + OFFSET_L(stickerIdx[i])] = cube[faceIdx[CUBE_SIDE_R] * CUBE_FACE_STICKER_NUM + OFFSET_R(stickerIdx[i])];
+        cube[faceIdx[CUBE_SIDE_R] * CUBE_FACE_STICKER_NUM + OFFSET_R(stickerIdx[i])] = tempColorIdx;
+      }
+      // 正视面颜色更新（i: 0~角块  1~棱块）
+      for (uint8_t i = STICKER_CORNER; i <= STICKER_EDGE; ++i) {
+        cube_color_t sticker_src_idx = facing_idx * CUBE_FACE_STICKER_NUM + i;
+        cube_color_t sticker_dest_idx = (sticker_src_idx + stickerIdxOffset) % CUBE_FACE_STICKER_NUM;
+        tempColorIdx = cube[sticker_src_idx];
+        cube[sticker_src_idx] = cube[sticker_dest_idx];
+        cube[sticker_dest_idx] = tempColorIdx;
+
+        sticker_src_idx += STICKER_GAP;
+        sticker_dest_idx += STICKER_GAP;
+        tempColorIdx = cube[sticker_src_idx];
+        cube[sticker_src_idx] = cube[sticker_dest_idx];
+        cube[sticker_dest_idx] = tempColorIdx;
+      }
+      return; // 分支已经处理正视面颜色更新，直接返回
+    }
+    case CUBE_TURN_270: {
+      // 相邻面颜色更新
+      for (cube_color_t i = 0; i < sizeof(stickerIdx); ++i) {
+        tempColorIdx = cube[faceIdx[CUBE_SIDE_U] * CUBE_FACE_STICKER_NUM + stickerIdx[i]];
+        cube[faceIdx[CUBE_SIDE_U] * CUBE_FACE_STICKER_NUM + stickerIdx[i]] = cube[faceIdx[CUBE_SIDE_R] * CUBE_FACE_STICKER_NUM + OFFSET_R(stickerIdx[i])];
+        cube[faceIdx[CUBE_SIDE_R] * CUBE_FACE_STICKER_NUM + OFFSET_R(stickerIdx[i])] = cube[faceIdx[CUBE_SIDE_D] * CUBE_FACE_STICKER_NUM + stickerIdx[i]];
+        cube[faceIdx[CUBE_SIDE_D] * CUBE_FACE_STICKER_NUM + stickerIdx[i]] = cube[faceIdx[CUBE_SIDE_L] * CUBE_FACE_STICKER_NUM + OFFSET_L(stickerIdx[i])];
+        cube[faceIdx[CUBE_SIDE_L] * CUBE_FACE_STICKER_NUM + OFFSET_L(stickerIdx[i])] = tempColorIdx;
+      }
+      break;
+    }
+    default:
+      break;
+  }
+  // 正视面颜色更新（i: 0~角块  1~棱块）
+  for (uint8_t i = STICKER_CORNER; i <= STICKER_EDGE; ++i) {
+    cube_color_t sticker_src_idx = facing_idx * CUBE_FACE_STICKER_NUM + i;
+    cube_color_t sticker_dest_idx = (sticker_src_idx + stickerIdxOffset) % CUBE_FACE_STICKER_NUM;
+    tempColorIdx = cube[sticker_src_idx];
+    uint8_t update_times = CUBE_TURN_CYCLE - 1;
+    while (update_times--) {
+      cube[sticker_src_idx] = cube[sticker_dest_idx];
+      sticker_src_idx = sticker_dest_idx;
+      sticker_dest_idx = (sticker_src_idx + stickerIdxOffset) % CUBE_FACE_STICKER_NUM;
+    }
+    cube[sticker_dest_idx] = tempColorIdx;
   }
 }
 
-/*
-说明：魔方执行单步转动，根据打乱，翻译为facing和turn_degree
-@param cube_t *cube 魔方颜色结构体指针
-@param char *scarmble_step 单步打乱字符串
-@return 无
-*/
-void cube_turn_one_step(char *scarmble_step) {
+/**
+ * @brief 解析单步打乱字符串，翻译为facing和turn_degree
+ * @param scramble_step 单步打乱字符串
+ * @return 无
+ */
+void cube_parse_step(const char* scramble_step) {
   // 判断正视面
   uint8_t facing_idx;
-  switch (scarmble_step[0]) {
+  switch (scramble_step[0]) {
     case 'F':
-      facing_idx = CUBE_FACING_FRONT;
+      facing_idx = CUBE_FACE_F_IDX;
       break;
     case 'R':
-      facing_idx = CUBE_FACING_RIGHT;
+      facing_idx = CUBE_FACE_R_IDX;
       break;
     case 'B':
-      facing_idx = CUBE_FACING_BACK;
+      facing_idx = CUBE_FACE_B_IDX;
       break;
     case 'L':
-      facing_idx = CUBE_FACING_LEFT;
+      facing_idx = CUBE_FACE_L_IDX;
       break;
     case 'U':
-      facing_idx = CUBE_FACING_UP;
+      facing_idx = CUBE_FACE_U_IDX;
       break;
     case 'D':
-      facing_idx = CUBE_FACING_DOWN;
+      facing_idx = CUBE_FACE_D_IDX;
       break;
     default:
-      break;
+      return;
   }
 
   // 判断转动角度
   cube_turn_t turn_degree;
-  switch (scarmble_step[1]) {
+  switch (scramble_step[1]) {
     case '\0':
       turn_degree = CUBE_TURN_90;
       break;
@@ -186,23 +181,22 @@ void cube_turn_one_step(char *scarmble_step) {
       turn_degree = CUBE_TURN_270;
       break;
     default:
-      turn_degree = CUBE_TURN_90;
-      break;
+      return;
   }
 
   // 执行颜色更新
-  cube_color_update(cube, facing_idx, turn_degree);
+  cube_turn(facing_idx, turn_degree);
 }
 
 /**
  * @brief 说明：魔方解析打乱字符串，分步调用单步打乱方法
  * 需要注意的是，如果scramble_alg在定义时已经指定了大小，末尾不会有\0
- * 可以用char *scarmble_alg;或char scramble_alg[];（不指定大小）
+ * 可以用char *scramble_alg;或char scramble_alg[];（不指定大小）
  * @param scarmble_alg 打乱公式字符串
  * @return 无
  */
-void cube_scramble_alg_parse(char* scarmble_alg) {
-  char *ptr = scarmble_alg;
+void cube_update_color(char* scramble_alg) {
+  char* ptr = scramble_alg;
   char step[2];
   cube_turn_t turn_degree;
   while(*ptr != '\0') {
@@ -213,20 +207,20 @@ void cube_scramble_alg_parse(char* scarmble_alg) {
         case '2':{
           ptr++; // 这个单步包含两个字符，ptr额外移动一位
           step[1] = '2';
-          cube_turn_one_step(cube, step);
+          cube_parse_step(step);
           break;
         }
         case '\'':{
           ptr++; // 这个单步包含两个字符，ptr额外移动一位
           step[1] = '\'';
-          cube_turn_one_step(cube, step);
+          cube_parse_step(step);
           break;
         }
         case '\0':
         case ' ':
         default: // 包含 F R B L U D
           step[1] = '\0';
-          cube_turn_one_step(cube, step);
+          cube_parse_step(step);
           break;
       }
     }
@@ -240,5 +234,5 @@ void cube_scramble_alg_parse(char* scarmble_alg) {
  * @return 魔方颜色结构体指针，即指向存储颜色信息的数组的指针
  */
 const cube_t* cube_get_color(void) {
-  return *cube;
+  return cube;
 }
