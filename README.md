@@ -5,6 +5,7 @@
 ### 面内序号
 中心块颜色始终不变，无需存储，自FLU色块开始顺时针开始标记，这是本项目实现高效算法设计的关键。
 ![cube_ManimCE_v0.20.1 - 2副本.png](https://picui.ogmua.cn/s1/2026/03/09/69aee9938297d.webp)
+
 这样在处理面内颜色信息交换时，只需根据旋转角度计算一个下标偏移。
 
 `offset = (TURN_CYCLE - turn_degree) * 2;`
