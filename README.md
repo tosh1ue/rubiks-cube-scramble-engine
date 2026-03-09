@@ -23,12 +23,15 @@
 算法采用**自顶向下**的设计。
 ### 第一层：解析打乱字符串
 `void cube_update_color(char* scramble_alg);`
+
 将打乱公式字符串拆解成R、R2、R'等单步打乱。
 ### 第二层：翻译单步打乱
 `void cube_parse_step(const char* scramble_step);`
+
 将单步打乱翻译成正视面和旋转角度。
 ### 第三层：
 `void cube_turn(const cube_face_t facing_idx, const cube_turn_t turn_degree);`
+
 根据正视面和旋转角度，确定需要交换的相邻面序号及需要交换的色块的序号，执行颜色更新。
 # API
 重置魔方颜色：
