@@ -12,7 +12,10 @@ offset = (TURN_CYCLE - turn_degree) * 2;
 ```
 例如旋转90度，对应旋转一次。偏移 = (4 - 1) * 2 = 6，即0变为6的颜色，6变为4的颜色，以此类推。
 ### 跨面序号
-特定色块在完整颜色信息数组中的序号为：面序号乘以每个面的色块数（不含中心块）加上色块在面内的序号。
+每个面的朝向经过特殊设计，这样可以使用同一套映射取得旋转时需要交换的色块序号。中心块的标号为所处面的序号。
+![Snipaste_2026-03-13_21-33-02.jpg](https://picui.ogmua.cn/s1/2026/03/13/69b4129f642a9.webp)   
+
+特定色块在完整颜色信息数组中的序号为：面序号乘以每个面的色块数（不含中心块）加上色块在面内的序号。  
 ```c
 stickerIdxPrefix = face_idx * CUBE_FACE_STICKER_NUM;
 cube_color_t sticker_color = cube[stickerIdxPrefix + sticker_idx];
@@ -59,3 +62,8 @@ void print_cube_as_num(const cube_t* cube);
 void print_cube_with_color(const cube_t* cube);
 ```
 由于部分终端输出不支持ANSI颜色代码，所以main方法中默认调用`print_cube_as_num`进行输出。
+# 注意事项
+色块的颜色信息使用单字节uint8_t存储，部分编译器在使用%d整型占位符时可能会警告甚至报错，所以在使用时最好自己强转成int类型。
+```c
+printf("%d", (int)cube[idx]);
+```

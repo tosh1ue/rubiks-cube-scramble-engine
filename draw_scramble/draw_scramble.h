@@ -39,8 +39,6 @@ typedef uint8_t cube_turn_t;
 #define CUBE_COLOR_ORANGE 5
 typedef uint8_t cube_color_t;
 
-typedef uint8_t cube_t;
-
 /**
  * @brief 魔方面索引值
  */
@@ -96,7 +94,7 @@ void cube_reset_color(void);
 
 void cube_update_color(char *scramble_alg);
 
-const cube_t* cube_get_color(void);
+const cube_color_t* cube_get_color(void);
 
 #ifdef __cplusplus
 }
