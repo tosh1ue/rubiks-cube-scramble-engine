@@ -203,9 +203,9 @@ void cube_update_color(char* scramble_alg) {
     //while(*ptr == ' ') ptr++; // 跳过空格，这一步在内部调用时可以省略，因为存储结构不包含空格
     if(*ptr == 'F' || *ptr == 'R' || *ptr == 'B' || *ptr == 'L' || *ptr == 'U' || *ptr == 'D') {
       step[0] = *ptr;
-      switch(*(ptr + 1)){       
+      switch(*(ptr + 1)) {
         case '2':
-        case '\'':{
+        case '\'': {
           step[1] = *(ptr + 1);
           ptr++; // 这个单步包含两个字符，ptr额外移动一位
           cube_parse_step(step);
@@ -213,10 +213,11 @@ void cube_update_color(char* scramble_alg) {
         }
         case '\0':
         case ' ':
-        default: // 包含 F R B L U D
+        default: { // 包含 F R B L U D
           step[1] = '\0';
           cube_parse_step(step);
           break;
+        }
       }
     }
     ptr++;
