@@ -1,5 +1,5 @@
 /**
- * @file draw_scramble.h
+ * @file scramble_engine.h
  * @brief 用于根据打乱公式计算打乱后的颜色信息
  * @author tosh1ue
  * @date 2026-02-03

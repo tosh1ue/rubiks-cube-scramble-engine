@@ -1,11 +1,11 @@
 cmake_minimum_required(VERSION 3.10)
-project(Rubiks-Cube-scramble-drawer C)
+project(rubiks-cube-scramble-engine C)
 
 set(CMAKE_C_STANDARD 99)
 
-include_directories(draw_scramble)
+include_directories(scramble_engine)
 
-add_executable(draw-scramble
-        draw_scramble/draw_scramble.c
-        draw_scramble/draw_scramble.h
+add_executable(scramble_engine
+        scramble_engine/scramble_engine.c
+        scramble_engine/scramble_engine.h
         example.c)

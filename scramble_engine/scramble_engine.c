@@ -1,11 +1,11 @@
 /**
- * @file draw_scramble.c
+ * @file scramble_engine.c
  * @brief 用于根据打乱公式计算打乱后的颜色信息
  * @author tosh1ue
  * @date 2026-02-03
  */
 
-#include "draw_scramble.h"
+#include "scramble_engine.h"
 #include <string.h>
 
 #define ARRAY_SIZE(arr) (sizeof(arr) / sizeof((arr)[0]))
