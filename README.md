@@ -61,9 +61,9 @@ const cube_color_t *cube_get_color(void);
 # 示例
 example.c提供了两个前端绘制方法：
 ```c
-void print_cube_as_num(const cube_color_t* cube);
+void print_cube_as_num(const cube_color_t *cube);
 
-void print_cube_with_color(const cube_color_t* cube);
+void print_cube_with_color(const cube_color_t *cube);
 ```
 由于部分终端输出不支持ANSI颜色代码，所以main方法中默认调用`print_cube_as_num`进行输出。
 # 注意事项
