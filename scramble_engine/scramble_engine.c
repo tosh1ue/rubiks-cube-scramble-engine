@@ -59,17 +59,17 @@ void cube_reset_color(void) {
  * @brief 根据旋转面和旋转角度，执行单步打乱颜色更新
  * @details 以U为基准，4个相邻面的偏移分别是0 y' 0 y
  * @param turn_face 魔方旋转面索引
- * @param turn_degree 旋转角度
+ * @param turn_angle 旋转角度
  */
-static void cube_turn(const cube_face_t turn_face, const cube_turn_t turn_degree) {
+static void cube_turn(const cube_face_t turn_face, const cube_turn_t turn_angle) {
   cube_color_t temp_sticker_color; // 临时颜色索引，用于处理循环交换
-  const uint8_t sticker_idx_offset = (CUBE_TURN_CYCLE - turn_degree) * 2; // 魔方面内色块索引偏移，用于处理旋转面颜色交换
+  const uint8_t sticker_idx_offset = (CUBE_TURN_CYCLE - turn_angle) * 2; // 魔方面内色块索引偏移，用于处理旋转面颜色交换
   const uint8_t sticker_idx_prefix = turn_face * STICKER_PER_FACE; // 色块索引前缀，用于处理旋转面颜色交换
   const cube_face_t *adj_faces = CUBE_NEIGHBOR_FACE_MAP[turn_face]; // 需要交换的面下标索引
   cube_sticker_t adj_stickers[3]; // 需要交换的色块下标索引
   cube_get_sticker_idx(turn_face, adj_stickers);
-  switch (turn_degree) {
-    case CUBE_TURN_90: {
+  switch (turn_angle) {
+    case CUBE_TURN_90_DEGREE: {
       // 相邻面颜色更新
       for (uint8_t i = 0; i < ARRAY_SIZE(adj_stickers); ++i) {
         temp_sticker_color = cube[adj_faces[CUBE_SIDE_U] * STICKER_PER_FACE + adj_stickers[i]];
@@ -80,7 +80,7 @@ static void cube_turn(const cube_face_t turn_face, const cube_turn_t turn_degree
       }
       break;
     }
-    case CUBE_TURN_180: { // 180度是两两互换，需要特殊处理
+    case CUBE_TURN_180_DEGREE: { // 180度是两两互换，需要特殊处理
       // 相邻面颜色更新
       for (uint8_t i = 0; i < ARRAY_SIZE(adj_stickers); ++i) {
         temp_sticker_color = cube[adj_faces[CUBE_SIDE_U] * STICKER_PER_FACE + adj_stickers[i]];
@@ -106,7 +106,7 @@ static void cube_turn(const cube_face_t turn_face, const cube_turn_t turn_degree
       }
       return; // 分支已经处理旋转面颜色更新，直接返回
     }
-    case CUBE_TURN_270: {
+    case CUBE_TURN_270_DEGREE: {
       // 相邻面颜色更新
       for (uint8_t i = 0; i < ARRAY_SIZE(adj_stickers); ++i) {
         temp_sticker_color = cube[adj_faces[CUBE_SIDE_U] * STICKER_PER_FACE + adj_stickers[i]];
@@ -137,7 +137,7 @@ static void cube_turn(const cube_face_t turn_face, const cube_turn_t turn_degree
 }
 
 /**
- * @brief 解析单步打乱字符串，翻译为turn_face和turn_degree
+ * @brief 解析单步打乱字符串，翻译为turn_face和turn_angle
  * @param face_char 单步打乱面字母
  * @param suffix_char 单步打乱后缀
  */
@@ -168,23 +168,23 @@ static void cube_parse_step(const char face_char, const char suffix_char) {
   }
 
   // 判断转动角度
-  cube_turn_t turn_degree;
+  cube_turn_t turn_angle;
   switch (suffix_char) {
     case '\0':
-      turn_degree = CUBE_TURN_90;
+      turn_angle = CUBE_TURN_90_DEGREE;
       break;
     case '2':
-      turn_degree = CUBE_TURN_180;
+      turn_angle = CUBE_TURN_180_DEGREE;
       break;
     case '\'':
-      turn_degree = CUBE_TURN_270;
+      turn_angle = CUBE_TURN_270_DEGREE;
       break;
     default:
       return;
   }
 
   // 执行颜色更新
-  cube_turn(turn_face, turn_degree);
+  cube_turn(turn_face, turn_angle);
 }
 
 /**

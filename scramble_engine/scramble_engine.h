@@ -23,9 +23,9 @@ extern "C" {
 /**
  * @brief 魔方转动角度
  */
-#define CUBE_TURN_90 1 // F
-#define CUBE_TURN_180 2 // F2
-#define CUBE_TURN_270 3 // F'
+#define CUBE_TURN_90_DEGREE 1 // F
+#define CUBE_TURN_180_DEGREE 2 // F2
+#define CUBE_TURN_270_DEGREE 3 // F'
 typedef uint8_t cube_turn_t;
 
 /**
@@ -86,8 +86,8 @@ typedef uint8_t cube_sticker_t;
 #define STICKER_EDGE_START_IDX CUBE_STICKER_U_IDX
 #define STICKER_GAP (CUBE_STICKER_RU_IDX - CUBE_STICKER_LU_IDX)
 
-#define STICKER_OFFSET_R ((CUBE_TURN_CYCLE - CUBE_TURN_270) * STICKER_GAP)
-#define STICKER_OFFSET_L ((CUBE_TURN_CYCLE - CUBE_TURN_90) * STICKER_GAP)
+#define STICKER_OFFSET_R ((CUBE_TURN_CYCLE - CUBE_TURN_270_DEGREE) * STICKER_GAP)
+#define STICKER_OFFSET_L ((CUBE_TURN_CYCLE - CUBE_TURN_90_DEGREE) * STICKER_GAP)
 #define OFFSET_R(sticker_idx) ((sticker_idx + STICKER_OFFSET_R) % STICKER_PER_FACE)
 #define OFFSET_L(sticker_idx) ((sticker_idx + STICKER_OFFSET_L) % STICKER_PER_FACE)
 
