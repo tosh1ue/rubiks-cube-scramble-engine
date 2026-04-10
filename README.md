@@ -10,7 +10,7 @@
 本项目使用一个一维数组存储魔方的颜色信息，数据类型为uint8_t，代表魔方颜色对应的索引，实际的颜色值由前端进行定义。
 ### 面内序号
 中心块颜色始终不变，无需存储，自FLU色块开始顺时针开始标记，这是本项目实现算法抽象设计的关键。  
-![](https://raw.githubusercontent.com/tosh1ue/pics/main/in-face-idx.png)  
+![](https://tosh1ue.github.io/pics/in-face-idx.png)  
 这样在处理面内颜色信息交换时，只需根据旋转角度计算一个下标偏移。
 ```c
 offset = (TURN_CYCLE - turn_degree) * 2;
@@ -18,7 +18,7 @@ offset = (TURN_CYCLE - turn_degree) * 2;
 例如旋转90度，对应旋转一次。偏移 = (4 - 1) * 2 = 6，即0变为6的颜色，6变为4的颜色，以此类推。
 ### 跨面序号
 每个面的朝向经过特殊设计，这样可以使用同一套映射取得旋转时需要交换的色块序号。以WCA打乱的标准朝向（白顶绿前），魔方面的顺序为F-U-R-B-D-L。从F面开始，每个面相邻U面即为它的下一个面，中心块的标号为所处面的序号（也是中心块的颜色索引）。  
-![](https://raw.githubusercontent.com/tosh1ue/pics/main/global-idx.jpg)  
+![](https://tosh1ue.github.io/pics/global-idx.jpg)  
 特定色块在完整颜色信息数组中的序号为：面序号乘以每个面的色块数（不含中心块）加上色块在面内的序号。  
 ```c
 sticker_idx_prefix = face_idx * STICKER_PER_FACE;
