@@ -10,25 +10,20 @@
 #include <string.h>
 #include <time.h>
 
-static const char move_faces[MOVE_FACE_MAX + 1] = {
-  'F', 'U', 'R', 'B', 'D', 'L'
-};
-
 /**
  * @brief 生成随机数的方法
- * @details 移植到不同平台时需要手动重新实现
+ * @details 目前使用C语言标准库生成，移植到不同平台时需要手动重新实现，同时移除srand()
  * @return 生成的随机数
  */
 static uint8_t get_random(void) {
-  return (uint8_t)( (uint32_t)rand() * UINT8_MAX / RAND_MAX );
+  return (uint8_t)( rand() % UINT8_MAX ); // NOLINT(cert-msc50-cpp)
 }
 
 void cube_generate_scramble(char *scramble_alg, uint8_t len) {
   if (scramble_alg == NULL) return;
   if (!IS_SCRAMBLE_LEN_VALID(len)) len = SCRAMBLE_DEFAULT_LEN;
-  // NOLINTNEXTLINE(cert-msc51-cpp)
-  srand(time(NULL) ^ (clock() << 16));
-  memset(scramble_alg, '\0', len * 2); // 重置打乱公式缓冲区
+  srand(time(NULL) ^ (clock() << 16)); // NOLINT(cert-msc51-cpp)
+  memset(scramble_alg, '\0', len * 3); // 重置打乱公式缓冲区
   uint8_t step_cnt = 0; // 记录当前已经生成步数长度
   char *scramble_pointer = scramble_alg; // 记录当前指针位置
   uint8_t move_face_idx = UINT8_MAX;
@@ -55,20 +50,45 @@ void cube_generate_scramble(char *scramble_alg, uint8_t len) {
     step_cnt++; // 更新当前已经生成步数长度
 
     // 添加单步打乱
-    *scramble_pointer = move_faces[move_face_idx];
-    scramble_pointer++;
-    switch (move_angle_idx) {
-      case MOVE_ANGLE_90:
-        continue;
-      case MOVE_ANGLE_180:
-        *scramble_pointer = '2';
+    switch (move_face_idx) {
+      case MOVE_FACE_F:
+        *scramble_pointer = 'F';
         break;
-      case MOVE_ANGLE_270:
-        *scramble_pointer = '\'';
+      case MOVE_FACE_U:
+        *scramble_pointer = 'U';
+        break;
+      case MOVE_FACE_R:
+        *scramble_pointer = 'R';
+        break;
+      case MOVE_FACE_B:
+        *scramble_pointer = 'B';
+        break;
+      case MOVE_FACE_D:
+        *scramble_pointer = 'D';
+        break;
+      case MOVE_FACE_L:
+        *scramble_pointer = 'L';
         break;
       default:
         continue;
     }
+    scramble_pointer++;
+    switch (move_angle_idx) {
+      case MOVE_ANGLE_90:
+        break;
+      case MOVE_ANGLE_180:
+        *scramble_pointer = '2';
+        scramble_pointer++;
+        break;
+      case MOVE_ANGLE_270:
+        *scramble_pointer = '\'';
+        scramble_pointer++;
+        break;
+      default:
+        break;
+    }
+    // 单步打乱后添加空格，调试用
+    *scramble_pointer = ' ';
     scramble_pointer++;
   }
 }

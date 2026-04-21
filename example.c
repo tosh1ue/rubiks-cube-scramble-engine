@@ -92,7 +92,7 @@ void print_cube_with_color(const cube_color_t* cube) {
 
 int main(void) {
   const uint8_t scramble_len = 25;
-  char scramble_alg[scramble_len * 2];
+  char scramble_alg[scramble_len * 3];
   cube_generate_scramble(scramble_alg, scramble_len);
   printf("generated scramble alg: %s\r\n", scramble_alg);
 
