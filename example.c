@@ -1,4 +1,7 @@
 #include <stdio.h>
+#include <stdlib.h>
+#include <time.h>
+
 #include "scramble_engine.h"
 #include "scramble_generator.h"
 
@@ -91,6 +94,7 @@ void print_cube_with_color(const cube_color_t* cube) {
 }
 
 int main(void) {
+  srand(time(NULL) ^ (clock() << 16)); // NOLINT(cert-msc51-cpp)
   const uint8_t scramble_len = 25;
   char scramble_alg[scramble_len * 3];
   cube_generate_scramble(scramble_alg, scramble_len);
