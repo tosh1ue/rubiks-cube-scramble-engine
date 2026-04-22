@@ -2,7 +2,7 @@
 #include <stdlib.h>
 #include <time.h>
 
-#include "scramble_engine.h"
+#include "move_applier.h"
 #include "scramble_generator.h"
 
 /**
