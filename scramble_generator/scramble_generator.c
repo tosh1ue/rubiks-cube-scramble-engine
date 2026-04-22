@@ -6,7 +6,6 @@
  */
 
 #include "scramble_generator.h"
-#include <stdlib.h>
 #include <string.h>
 #include <time.h>
 
@@ -16,7 +15,25 @@
  * @return 生成的随机数
  */
 static uint8_t get_random(void) {
-  return (uint8_t)( rand() % (UINT8_MAX + 1) ); // NOLINT(cert-msc50-cpp)
+  uint64_t r;
+  do {
+    r = rand(); // NOLINT(cert-msc50-cpp)
+  } while (r >= RAND_RANGE - RAND_RANGE % UINT8_RANGE);
+  return (uint8_t)(r % UINT8_RANGE);
+}
+
+/**
+ * @brief 均匀生成指定范围内的随机数
+ * @details 使用拒绝采样，保证范围内的所有数字出现概率相等
+ * @param range 要生成的随机数范围
+ * @return 生成的随机数
+ */
+static uint8_t generate_unbiased_random_num(const uint8_t range) {
+  uint8_t r;
+  do {
+    r = get_random();
+  } while (r >= UINT8_RANGE - UINT8_RANGE % range);
+  return r % range;
 }
 
 /**
@@ -38,8 +55,9 @@ void cube_generate_scramble(char *scramble_alg, uint8_t len) {
   uint8_t move_last_face_idx = UINT8_MAX;
   uint8_t move_second_last_face_idx = UINT8_MAX;
   while (step_cnt < len) {
-    move_face_idx = get_random() % (MOVE_FACE_MAX + 1);
-    move_angle_idx = get_random() % (MOVE_ANGLE_MAX + 1);
+    // 使用拒绝采样生成随机旋转面和旋转角度
+    move_face_idx = generate_unbiased_random_num(MOVE_FACE_RANGE);
+    move_angle_idx = generate_unbiased_random_num(MOVE_ANGLE_RANGE);
 
     // 检验生成的单步打乱是否有效
     if (step_cnt >= 2) {

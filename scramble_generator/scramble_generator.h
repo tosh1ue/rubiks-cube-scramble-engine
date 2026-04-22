@@ -13,6 +13,7 @@ extern "C" {
 #endif
 
 #include <stdint.h>
+#include <stdlib.h>
 #include <stdbool.h>
 
 #define MOVE_FACE_F       0
@@ -29,6 +30,11 @@ typedef uint8_t move_face_t;
 #define MOVE_ANGLE_270    2
 #define MOVE_ANGLE_MAX    MOVE_ANGLE_270
 typedef uint8_t move_angle_t;
+
+#define RAND_RANGE        (RAND_MAX + 1)
+#define UINT8_RANGE       (UINT8_MAX + 1)
+#define MOVE_FACE_RANGE   (MOVE_FACE_MAX + 1)
+#define MOVE_ANGLE_RANGE  (MOVE_ANGLE_MAX + 1)
 
 #define MOVE_FACE_HALF                        ((MOVE_FACE_MAX + 1) / 2)
 #define ARE_FACES_SAME(face_a, face_b)        (face_a == face_b)
