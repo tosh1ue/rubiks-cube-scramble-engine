@@ -9,31 +9,18 @@
 #include <string.h>
 
 /**
- * @brief 均匀生成uint8随机数的方法
- * @details 目前使用C语言标准库生成，配合拒绝采样，保证范围内的所有数字出现概率相等。
- *          移植到不同平台时需要手动重新实现，同时移除srand()
- * @return 生成的随机数
- */
-static uint8_t get_unbiased_in_uint8(void) {
-  uint64_t r;
-  do {
-    r = rand(); // NOLINT(cert-msc50-cpp)
-  } while (r >= RAND_RANGE - RAND_RANGE % UINT8_RANGE);
-  return (uint8_t)(r % UINT8_RANGE);
-}
-
-/**
  * @brief 均匀生成指定范围内的随机数
- * @details 使用拒绝采样，保证范围内的所有数字出现概率相等
+ * @details 使用拒绝采样，保证范围内的所有数字出现概率相等。
+ *          目前使用C语言标准库生成，移植到不同平台时需要手动重新实现，同时移除srand()。
  * @param range 要生成的随机数范围
  * @return 生成的随机数
  */
 static uint8_t get_unbiased_in_range(const uint8_t range) {
-  uint8_t r;
+  uint64_t r;
   do {
-    r = get_unbiased_in_uint8();
-  } while (r >= UINT8_RANGE - UINT8_RANGE % range);
-  return r % range;
+    r = rand(); // NOLINT(cert-msc50-cpp)
+  } while (r >= RAND_RANGE - RAND_RANGE % range);
+  return (uint8_t)(r % range);
 }
 
 /**
