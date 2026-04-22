@@ -9,11 +9,12 @@
 #include <string.h>
 
 /**
- * @brief 生成随机数的方法
- * @details 目前使用C语言标准库生成，移植到不同平台时需要手动重新实现，同时移除srand()
+ * @brief 均匀生成uint8随机数的方法
+ * @details 目前使用C语言标准库生成，配合拒绝采样，保证范围内的所有数字出现概率相等。
+ *          移植到不同平台时需要手动重新实现，同时移除srand()
  * @return 生成的随机数
  */
-static uint8_t get_random(void) {
+static uint8_t get_unbiased_in_uint8(void) {
   uint64_t r;
   do {
     r = rand(); // NOLINT(cert-msc50-cpp)
@@ -27,10 +28,10 @@ static uint8_t get_random(void) {
  * @param range 要生成的随机数范围
  * @return 生成的随机数
  */
-static uint8_t generate_unbiased_random_num(const uint8_t range) {
+static uint8_t get_unbiased_in_range(const uint8_t range) {
   uint8_t r;
   do {
-    r = get_random();
+    r = get_unbiased_in_uint8();
   } while (r >= UINT8_RANGE - UINT8_RANGE % range);
   return r % range;
 }
@@ -55,8 +56,8 @@ void cube_generate_scramble(char *scramble_alg, uint8_t len) {
   uint8_t move_second_last_face_idx = UINT8_MAX;
   while (step_cnt < len) {
     // 使用拒绝采样生成随机旋转面和旋转角度
-    move_face_idx = generate_unbiased_random_num(MOVE_FACE_RANGE);
-    move_angle_idx = generate_unbiased_random_num(MOVE_ANGLE_RANGE);
+    move_face_idx = get_unbiased_in_range(MOVE_FACE_RANGE);
+    move_angle_idx = get_unbiased_in_range(MOVE_ANGLE_RANGE);
 
     // 检验生成的单步打乱是否有效
     if (step_cnt >= 2) {
