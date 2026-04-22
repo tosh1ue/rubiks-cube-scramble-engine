@@ -1,5 +1,5 @@
 # 简介
-本项目是一个超轻量的三阶魔方引擎，包含三阶魔方颜色信息存储结构和根据打乱公式更新魔方颜色信息的算法，配合前端可以制作魔方打乱图案生成器、魔方动画渲染器等。占用资源小、无外部依赖，特别适合集成到单片机等资源紧张的平台。
+本项目是一个超轻量的三阶魔方引擎，包含三阶魔方颜色信息存储结构、WCA标准打乱公式生成的方法（random-move）以及根据打乱公式更新魔方颜色信息的算法，配合前端可以制作魔方打乱图案生成器、魔方计时器等。占用资源小、无外部依赖，特别适合集成到单片机等资源紧张的平台。
 # 特点
 - **可维护性强**：算法层级清晰，分工明确
 - **可移植性强**：仅依赖标准库，可嵌入到任何前端
@@ -46,6 +46,10 @@ static void cube_parse_step(const char face_char, const char suffix_char);
 static void cube_turn(const cube_face_t turn_face, const cube_turn_t turn_angle);
 ```
 # API
+生成打乱公式：
+```c
+void cube_generate_scramble(char *scramble_alg, uint8_t len)：
+```
 重置魔方颜色：
 ```c
 void cube_reset_color(void);
