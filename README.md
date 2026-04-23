@@ -41,7 +41,7 @@ void cube_update_color(const char *scramble_alg);
 static void cube_parse_step(const char face_char, const char suffix_char);
 ```
 ### 第三层：执行颜色更新
-根据正视面和旋转角度，确定需要交换的相邻面序号及需要交换的色块的序号，执行颜色更新。
+根据旋转面和旋转角度，确定需要交换的相邻面序号及需要交换的色块的序号，执行颜色更新。
 ```c
 static void cube_turn(const cube_face_t turn_face, const cube_turn_t turn_angle);
 ```
@@ -63,7 +63,7 @@ void cube_update_color(char *scramble_alg);
 const cube_color_t *cube_get_color(void);
 ```
 # 示例代码
-example.c提供了两个前端绘制方法：  
+example.c提供了两个前端绘制方法  
 
 将魔方颜色信息转换为数字字符串输出：  
 ```c
